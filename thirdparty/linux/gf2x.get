@@ -1,4 +1,4 @@
-wget https://gforge.inria.fr/frs/download.php/file/36934/gf2x-1.2.tar.gz
+wget https://gitlab.inria.fr/gf2x/gf2x/uploads/46a3851a4aa6888e6a6a7ce3de33f0f4/gf2x-1.2.tar.gz
 tar -zxvf gf2x-1.2.tar.gz 
 mv gf2x-1.2 gf2x
 rm gf2x-1.2.tar.gz
