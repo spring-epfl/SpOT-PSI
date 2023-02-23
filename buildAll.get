@@ -1,13 +1,15 @@
 #!/bin/bash
 
-cd libOTe/cryptoTools/thirdparty/linux/
+cd /psi/SpOT-PSI/
+git submodule update --init --recursive
+cd /psi/SpOT-PSI/libOTe/cryptoTools/thirdparty/linux/
 bash all.get
 cd ../../../
 cmake .  
 make -j
-cd ..
-cd thirdparty/linux/ 
+cd /psi/SpOT-PSI/thirdparty/linux/ 
 bash all.get
 cd ../../
 cmake .  
 make -j
+cd /psi/docker/

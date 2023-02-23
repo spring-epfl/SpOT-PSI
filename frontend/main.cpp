@@ -123,6 +123,10 @@ void usage(const char* argv0)
 
 void Sender(span<block> inputs, u64 theirSetSize, string ipAddr_Port, u64 numThreads = 1)
 {
+	
+	// for (u64 i = 0; i < inputs.size(); ++i)
+	// 	std::cout << inputs[i] << " ";
+	// std::cout << std::endl;
 	u64 psiSecParam = 40;
 
 	PRNG prng0(_mm_set_epi32(4253465, 3434565, 234435, 23987045));
@@ -164,6 +168,10 @@ void Sender(span<block> inputs, u64 theirSetSize, string ipAddr_Port, u64 numThr
 
 void Receiver( span<block> inputs, u64 theirSetSize, string ipAddr_Port, u64 numThreads=1)
 {
+	// for (u64 i = 0; i < inputs.size(); ++i)
+	// 	std::cout << inputs[i] << " ";
+	// std::cout << std::endl;
+	
 	u64 psiSecParam = 40;
 
 	PRNG prng1(_mm_set_epi32(4253465, 3434565, 234435, 23987025));
@@ -215,7 +223,7 @@ void Receiver( span<block> inputs, u64 theirSetSize, string ipAddr_Port, u64 num
 		recvChls[g].resetStats();
 	}
 
-	std::cout << "      Total Comm = " << string_format("%5.2f", (dataRecv + dataSent) / std::pow(2.0, 20)) << " MB\n";
+	std::cout << "      Total Comm = " << string_format("%u", (dataRecv + dataSent)) << " B\n";
 	
 	for (u64 i = 0; i < numThreads; ++i)
 		recvChls[i].close();
@@ -823,7 +831,7 @@ int main(int argc, char** argv)
 	/*Prty_PSI_impl();
 	return 0;*/
 	
-	u64 sendSetSize = 1 << 8, recvSetSize = 1 << 8, numThreads = 1;
+	u64 sendSetSize = 1 << 8, recvSetSize = 1 << 8, numThreads = 1, nDocs = 1;
 	
 
 	if (argc == 11
@@ -837,8 +845,6 @@ int main(int argc, char** argv)
 		numThreads = atoi(argv[8]);
 		ipadrr = argv[10];
 		protocolId = 1;
-
-
 	}
 
 	if (argc == 11
@@ -851,6 +857,19 @@ int main(int argc, char** argv)
 		recvSetSize = sendSetSize;
 		numThreads = atoi(argv[6]);
 		protocolId = atoi(argv[8]);
+		ipadrr = argv[10];
+	}
+
+	if (argc == 11
+		&& argv[3][0] == '-' && argv[3][1] == 'n'
+		&& argv[5][0] == '-' && argv[5][1] == 't'
+		&& argv[7][0] == '-' && argv[7][1] == 'd'
+		&& argv[9][0] == '-' && argv[9][1] == 'i' && argv[9][2] == 'p')
+	{
+		sendSetSize = 1 << atoi(argv[4]);
+		recvSetSize = sendSetSize;
+		numThreads = atoi(argv[6]);
+		nDocs = atoi(argv[8]);
 		ipadrr = argv[10];
 	}
 
@@ -868,6 +887,17 @@ int main(int argc, char** argv)
 	if (argc == 9
 		&& argv[3][0] == '-' && argv[3][1] == 'n'
 		&& argv[5][0] == '-' && argv[5][1] == 't'
+		&& argv[7][0] == '-' && argv[7][1] == 'd')
+	{
+		sendSetSize = 1 << atoi(argv[4]);
+		recvSetSize = sendSetSize;
+		numThreads = atoi(argv[6]);
+		nDocs = atoi(argv[8]);
+	}
+
+	if (argc == 9
+		&& argv[3][0] == '-' && argv[3][1] == 'n'
+		&& argv[5][0] == '-' && argv[5][1] == 't'
 		&& argv[7][0] == '-' && argv[7][1] == 'p')
 	{
 		sendSetSize = 1 << atoi(argv[4]);
@@ -876,71 +906,69 @@ int main(int argc, char** argv)
 		protocolId = atoi(argv[8]);
 	}
 
+	for (u64 i=0; i < nDocs; ++i) {
 		
-	PRNG prng0(_mm_set_epi32(4253465, 3434565, 234435, 23987045));
-	std::vector<block> sendSet(sendSetSize), recvSet(recvSetSize);
-	
-	std::cout << "SetSize: " << sendSetSize << " vs " << recvSetSize << "   |  numThreads: " << numThreads<< "\t";
-	
-	if(protocolId==0)
-		std::cout << "   |   IsCommOptimzed: No \n";
-	else
-		std::cout << "   |   IsCommOptimzed: Yes \n";
-
-
-
-	
-	for (u64 i = 0; i < sendSetSize; ++i)
-		sendSet[i] = prng0.get<block>();
-
-	for (u64 i = 0; i < recvSetSize; ++i)
-		recvSet[i] = prng0.get<block>();
-
-	for (u64 i = 0; i < expectedIntersection; ++i)
-	{
-		sendSet[i] = recvSet[i];
-	}
-
-	
-#if 0
-	std::thread thrd = std::thread([&]() {
-		Sender(sendSet, recvSetSize, numThreads);
-
-	});
-
-	Receiver(recvSet, sendSetSize, numThreads);
-
-
-	thrd.join();
-	return 0;
-#endif
-
-	
-
-	if (argv[1][0] == '-' && argv[1][1] == 't') {
+		PRNG prng0(_mm_set_epi32(4253465, 3434565, 234435, 23987045));
+		std::vector<block> sendSet(sendSetSize), recvSet(recvSetSize);
 		
-		protocolId=1;
+		std::cout << "SetSize: " << sendSetSize << " vs " << recvSetSize << "   |  numThreads: " << numThreads<< "\t";
+		
+		if(protocolId==0)
+			std::cout << "   |   IsCommOptimzed: No \n";
+		else
+			std::cout << "   |   IsCommOptimzed: Yes \n";
+
+		for (u64 i = 0; i < sendSetSize; ++i)
+			sendSet[i] = prng0.get<block>();
+
+		for (u64 i = 0; i < recvSetSize; ++i)
+			recvSet[i] = prng0.get<block>();
+
+		for (u64 i = 0; i < expectedIntersection; ++i)
+		{
+			sendSet[i] = recvSet[i];
+		}
+
+		std::cout << "first marker\n";
+	#if 0
 		std::thread thrd = std::thread([&]() {
-			Sender(sendSet, recvSetSize,"localhost:1212", numThreads);
+			Sender(sendSet, recvSetSize, numThreads);
+
 		});
 
-		Receiver(recvSet, sendSetSize, "localhost:1212", numThreads);
+		Receiver(recvSet, sendSetSize, numThreads);
+
 
 		thrd.join();
+		return 0;
+	#endif
 
-	}
-	else if (argv[1][0] == '-' && argv[1][1] == 'r' && atoi(argv[2]) == 0) {
-		Sender(sendSet, recvSetSize, ipadrr, numThreads);
-	}
-	else if (argv[1][0] == '-' && argv[1][1] == 'r' && atoi(argv[2]) == 1) {
-		Receiver(recvSet, sendSetSize, ipadrr, numThreads);
-	}
-	else {
-		usage(argv[0]);
-	}
+		if (argv[1][0] == '-' && argv[1][1] == 't') {
+			
+			protocolId=1;
+			std::thread thrd = std::thread([&]() {
+				Sender(sendSet, recvSetSize,"localhost:1212", numThreads);
+			});
+
+			Receiver(recvSet, sendSetSize, "localhost:1212", numThreads);
+
+			thrd.join();
+
+		}
+		else if (argv[1][0] == '-' && argv[1][1] == 'r' && atoi(argv[2]) == 0) {
+			Sender(sendSet, recvSetSize, ipadrr, numThreads);
+		}
+		else if (argv[1][0] == '-' && argv[1][1] == 'r' && atoi(argv[2]) == 1) {
+			Receiver(recvSet, sendSetSize, ipadrr, numThreads);
+		}
+		else {
+			usage(argv[0]);
+			std::cout << "second marker\n";
+		}
 
 
-	
+		std::cout << "third marker\n";
+	}
   
 	return 0;
 }

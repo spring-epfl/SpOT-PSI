@@ -72,7 +72,7 @@ set(GF2X_Dirs "${CMAKE_SOURCE_DIR}/thirdparty/linux/gf2x/")
 include_directories("${GF2X_Dirs}/include/")
 
 # default location for Boost
-set(BOOST_ROOT "${libOTe_Dirs}/cryptoTools/thirdparty/linux/boost/")
+set(BOOST_ROOT "${CMAKE_SOURCE_DIR}/libOTe/cryptoTools/thirdparty/linux/boost")
 include_directories("${BOOST_ROOT}")
 
 #############################################
